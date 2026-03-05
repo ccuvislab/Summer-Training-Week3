@@ -56,7 +56,7 @@ def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], T
         anno_file = os.path.join(annotation_dirname, fileid + ".xml")
         jpeg_file = os.path.join(dirname, "JPEGImages", fileid + ".jpg") 
         if not os.path.exists(jpeg_file):
-            jpeg_file = os.path.join(dirname, "JPEGImages", fileid + ".png")    #讀不到jpg檔案就讀png檔案
+            jpeg_file = os.path.join(dirname, "JPEGImages", fileid + ".png")    # Fall back to .png if .jpg not found / 讀不到jpg檔案就讀png檔案
 
         with PathManager.open(anno_file) as f:
             tree = ET.parse(f)
@@ -71,7 +71,7 @@ def load_voc_instances(dirname: str, split: str, class_names: Union[List[str], T
 
         for obj in tree.findall("object"):
             cls = obj.find("name").text
-            if cls not in class_names: # 如果此物件的類別不在我們設定的 class_names 裡，就直接跳過
+            if cls not in class_names: # Skip if this object's class is not in our class_names / 如果此物件的類別不在我們設定的 class_names 裡，就直接跳過
                 continue
             # We include "difficult" samples in training.
             # Based on limited experiments, they don't hurt accuracy.
@@ -183,11 +183,11 @@ class Trainer(DefaultTrainer):
         return build_evaluator(cfg, dataset_name, output_folder)
     
     def run_step(self):
-        super().run_step()  # 保留原來的訓練步驟
+        super().run_step()  # Keep the original training step / 保留原來的訓練步驟
 
-        # 記錄學習率和損失
-        lr = self.optimizer.param_groups[0]["lr"]  # 獲取學習率
-        total_loss = self.storage.history("total_loss").avg(20)  # 取最近20次的平均 total loss
+        # Log learning rate and loss / 記錄學習率和損失
+        lr = self.optimizer.param_groups[0]["lr"]  # Get learning rate / 獲取學習率
+        total_loss = self.storage.history("total_loss").avg(20)  # Average total loss of last 20 steps / 取最近20次的平均 total loss
 
     @classmethod
     def test_with_TTA(cls, cfg, model):
@@ -261,7 +261,7 @@ def invoke_main() -> None:
 
 
 # +
-dataset_path = 'C:/Users/user/Probabilistic Teacher/ProbabilisticTeacher/data/VOC2007_citytrain' # 這是你的資料集路徑
+dataset_path = 'C:/Users/user/Probabilistic Teacher/ProbabilisticTeacher/data/VOC2007_citytrain' # Dataset path / 這是你的資料集路徑
 class_names = ('truck','car','rider','person','train','motorcycle','bicycle','bus')
 
 
